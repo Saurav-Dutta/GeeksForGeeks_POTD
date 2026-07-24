@@ -1,20 +1,17 @@
 class Solution {
-    canRepresentBST(arr) {
-        let st = [];
-        let lowerBound = -Infinity;
-
-        for (let value of arr) {
-            if (value < lowerBound) {
-                return false;
-            }
-
-            while (st.length > 0 && value > st[st.length - 1]) {
-                lowerBound = st.pop();
-            }
-
-            st.push(value);
+    // Function to return a list containing the preorder
+    // traversal of the tree.
+    preOrder(root) {
+        const result = [];
+        
+        function traverse(node) {
+            if (node === null) return;
+            result.push(node.data);
+            traverse(node.left);
+            traverse(node.right);
         }
-
-        return true;
+        
+        traverse(root);
+        return result;
     }
 }
