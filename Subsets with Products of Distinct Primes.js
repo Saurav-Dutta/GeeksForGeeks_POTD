@@ -1,67 +1,50 @@
 class Solution {
     countSubsets(arr) {
-        const MOD = 1000000007;
-        const primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29];
+        const MOD = 1000000007n;
 
-        const mask = new Array(31).fill(0);
+        const validMask = {
+            2:1, 3:2, 5:4, 6:3, 7:8, 10:5, 11:16,
+            13:32, 14:9, 15:6, 17:64, 19:128, 21:10,
+            22:17, 23:256, 26:33, 29:512, 30:7
+        };
 
-        for (let x = 2; x <= 30; x++) {
-            let cur = x;
-            let bits = 0;
-            let ok = true;
+        const freq = new Array(31).fill(0);
+        for (let x of arr) freq[x]++;
 
-            for (let i = 0; i < 10; i++) {
-                const p = primes[i];
-                let cnt = 0;
+        const SIZE = 1 << 10;
+        let dp = new Array(SIZE).fill(0n);
+        dp[0] = 1n;
 
-                while (cur % p === 0) {
-                    cur = Math.floor(cur / p);
-                    cnt++;
+        for (let num in validMask) {
+            num = Number(num);
+            if (freq[num] === 0) continue;
+
+            const mask = validMask[num];
+            const f = BigInt(freq[num]);
+            const ndp = dp.slice();
+
+            for (let m = 0; m < SIZE; m++) {
+                if ((m & mask) === 0) {
+                    ndp[m | mask] = (ndp[m | mask] + dp[m] * f) % MOD;
                 }
-
-                if (cnt > 1) {
-                    ok = false;
-                    break;
-                }
-
-                if (cnt === 1) bits |= (1 << i);
             }
-
-            mask[x] = ok ? bits : -1;
+            dp = ndp;
         }
 
-        const dp = new Array(1 << 10).fill(0);
-        dp[0] = 1;
-
-        let ones = 0;
-
-        for (const x of arr) {
-            if (x === 1) {
-                ones++;
-                continue;
-            }
-
-            if (mask[x] === -1) continue;
-
-            const curMask = mask[x];
-
-            for (let m = (1 << 10) - 1; m >= 0; m--) {
-                if ((m & curMask) !== 0) continue;
-
-                dp[m | curMask] = (dp[m | curMask] + dp[m]) % MOD;
-            }
+        let ans = 0n;
+        for (let m = 1; m < SIZE; m++) {
+            ans = (ans + dp[m]) % MOD;
         }
 
-        let ans = 0;
-        for (const ways of dp) {
-            ans = (ans + ways) % MOD;
-        }
+        // Multiply by 2^(count of ones)
+        let mul = 1n;
+        let base = 2n;
+        let e = BigInt(freq[1]);
 
-        ans = (ans - 1 + MOD) % MOD;
-
-        let mul = 1;
-        while (ones-- > 0) {
-            mul = (mul * 2) % MOD;
+        while (e > 0n) {
+            if (e & 1n) mul = (mul * base) % MOD;
+            base = (base * base) % MOD;
+            e >>= 1n;
         }
 
         return Number((ans * mul) % MOD);
