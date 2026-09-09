@@ -1,48 +1,50 @@
 class Solution {
     /**
-     * @param {string[][]} mat
+     * @param {character[][]} mat
      * @param {string} word
-     * @returns {number[][]}
+     * @return {number[][]}
      */
     searchWord(mat, word) {
         const n = mat.length;
+        if (n === 0) return [];
         const m = mat[0].length;
         const k = word.length;
         const ans = [];
-        
-        // Direction vectors for moving in 8 directions
-        const dr = [-1, -1, -1,  0, 0,  1, 1, 1];
-        const dc = [-1,  0,  1, -1, 1, -1, 0, 1];
-        
+
+        // 8 direction vectors for grid movement
+        const dr = [-1, -1, -1, 0, 0, 1, 1, 1];
+        const dc = [-1, 0, 1, -1, 1, -1, 0, 1];
+
         for (let i = 0; i < n; i++) {
             for (let j = 0; j < m; j++) {
-                // Check if the current matrix character matches the first letter of the word
+                // If the first character doesn't match, skip
                 if (mat[i][j] !== word[0]) {
                     continue;
                 }
-                
+
+                // Check all 8 directions
                 for (let d = 0; d < 8; d++) {
                     let found = true;
-                    
+
                     for (let p = 1; p < k; p++) {
-                        let nr = i + p * dr[d];
-                        let nc = j + p * dc[d];
-                        
-                        // Check boundary constraints and character matching
+                        const nr = i + p * dr[d];
+                        const nc = j + p * dc[d];
+
+                        // Boundary and character matching check
                         if (nr < 0 || nr >= n || nc < 0 || nc >= m || mat[nr][nc] !== word[p]) {
                             found = false;
                             break;
                         }
                     }
-                    
+
+                    // If word is completely found in this direction, record the starting coordinates
                     if (found) {
-                        ans.push({ i, j });
-                        break; // Stop exploring other directions from the same starting cell
+                        ans.push([i, j]);
+                        break; // Move to the next grid cell
                     }
                 }
             }
         }
-        
         return ans;
     }
 }
